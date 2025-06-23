@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $.Values.pgadmin.name }}-service
+  namespace: {{ $.Values.global.namespace }}
+spec:
+  type: {{ $.Values.pgadmin.service.type }}
+  selector:
+    app: {{ $.Values.pgadmin.name }}
+  ports:
+    - port: {{ $.Values.pgadmin.port }}
+      targetPort: {{ $.Values.pgadmin.port }}
+      nodePort: {{ $.Values.pgadmin.service.nodePort }}      

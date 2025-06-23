@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fullstack.fullname" . }}
+  labels:
+    {{- include "fullstack.labels" . | nindent 4 }}
+  namespace: {{ $.Values.global.namespace }}
+spec:
+  {{- if not $.Values.autoscaling.enabled }}
+  replicas: {{ $.Values.replicaCount }}
+  {{- else }}
+  replicas: {{ $.Values.autoscaling.minReplicas }}
+  {{- end }}
+  strategy:
+    type: {{ $.Values.strategy.type }}
+    rollingUpdate:
+      maxUnavailable: {{ $.Values.strategy.maxUnavailable }}
+      maxSurge: {{ $.Values.strategy.maxSurge }}
+  selector:
+    matchLabels:
+      {{- include "fullstack.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with $.Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "fullstack.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ $.Values.images.repository }}:{{ $.Values.images.tag }}"
+          imagePullPolicy: {{ $.Values.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "fullstack.name" . }}-env
+          ports:
+            - name: http
+              containerPort: {{ $.Values.port }}
+              protocol: TCP
+          {{- with $.Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $.Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $.Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}

@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $.Values.nameOverride }}-monitoring
+  namespace: {{ $.Values.global.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app : {{ $.Values.pgadmin.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $.Values.pgadmin.name }}
+    spec:
+      containers:
+      - name: {{ $.Values.pgadmin.name }}
+        image: {{ $.Values.pgadmin.image }}
+        ports:
+        - containerPort: {{ $.Values.pgadmin.port }}
+        env:
+        - name: PGADMIN_DEFAULT_EMAIL
+          value: {{ $.Values.pgadmin.mail }}
+        - name: PGADMIN_DEFAULT_PASSWORD
+          value: {{ $.Values.pgadmin.password }}
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"

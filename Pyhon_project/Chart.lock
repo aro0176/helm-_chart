@@ -1,0 +1,12 @@
+dependencies:
+- name: fullstack
+  repository: file://charts/fullstack
+  version: 1.0.1
+- name: database
+  repository: file://charts/database
+  version: 1.0.0
+- name: phpmyadmin
+  repository: file://charts/phpmyadmin
+  version: 1.0.1
+digest: sha256:4775bfb79921a912be7279b60eb1da33b5368d18b2ae90288d1c7e88f523cad6
+generated: "2025-05-22T23:08:57.796809516+03:00"

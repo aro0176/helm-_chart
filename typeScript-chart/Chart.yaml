@@ -1,0 +1,14 @@
+apiVersion: v2
+name: typeScript-chart
+description: A Helm chart for Kubernetes
+type: application
+version: 1.0.0
+appVersion: "0.0.1" #tag image Helm n'utilise pas cette version mais visible dans helm list et helm get all pour gerer versioning
+
+dependencies:
+  - name:  backend
+    version: 1.0.0  #Mettre la version a ma facon 
+    repository: "file://charts/backend"
+  - name:  database
+    version: 2.1.0  # Zay tiko ral ah 
+    repository: "file://charts/database"

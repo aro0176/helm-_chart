@@ -1,0 +1,45 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+    name: microk8s-hostpath
+    namespace: {{ $.Values.global.namespace }}
+    annotations:
+        storageclass.kubernetes.io/is-default-class: "true"
+provisioner: microk8s.io/hostpath
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "database.name" . }}-pv
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+    {{- include "database.labels" . | nindent 4 }}
+    type: local
+spec:
+  storageClassName:  microk8s-hostpath
+  capacity:
+    storage: {{ $.Values.volumeHost.capacity }}
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: {{ $.Values.volumeHost.hostPath | quote }}
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim 
+metadata: 
+  name: {{ include "database.name" . }}-pvc
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+    {{- include "database.labels" . | nindent 4}}
+spec:
+  storageClassName: microk8s-hostpath
+  capacity:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ $.Values.volumeHost.capacity }}

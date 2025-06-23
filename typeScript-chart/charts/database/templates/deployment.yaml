@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "database.fullname" . }}
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+    {{- include "database.labels" . | nindent 4 }}
+
+spec:
+  serviceName: {{ $.Values.nameOverride | quote }}
+  {{- if $.Values.autoscaling.enabled }}
+  replicas: {{ $.Values.minReplicas }}
+  {{- else }}
+  replicas: {{ $.Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "database.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "database.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ include "database.name" . }}
+          image: "{{ $.Values.depotImage }}:{{ $.Values.tag }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "database.name" . }}-env
+          ports:
+            - containerPort: {{ $.Values.port }}
+          {{- with $.Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if $.Values.autoscaling.enabled }}
+          resources:
+            {{- with $.Values.autoscaling.resources }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- else}}
+          resources:
+            {{- toYaml $.Values.resources | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: {{ $.Values.volumes.namepvc }}
+          persistentVolumeClaim:
+            claimName: {{ include "database.name" . }}-pvc
+        - name: {{ $.Values.volumes.nameScript }}
+          configMap:
+            name: {{ include "database.name" . }}-env-script
+        - name: {{ $.Values.volumes.nameAdminData }}
+          configMap:
+            name: {{ include "database.name" . }}-env-script
+

@@ -1,0 +1,79 @@
+variableBackend:
+  nameBackend : &nameBackend nest
+  fullNameBackend : &fullNameBackend nestback
+  imageRepoBack : &imagerepoback akamatatra/nest-framework    # Repo image dans DockerHub 
+  versionImageBack : &versionImageBack back           # Image TAG
+  portApi : &portApi 3000
+  portApiQuote : &portApiQuote "3000"
+  minInstance : &minInstance 3
+  maxInstance : &maxInstance 100
+  jwt : &jwt secret
+
+variableDatabase:
+  nameDB :  &nameDB postgres
+  fullNameDB : &fullNameDB postgres-avec-etat
+  imageRepoDB: &imagerepoDB postgres             # DEPOT DOCKERHUB
+  versionImageDB: &versionImageDB 15          # TAG
+  portDb : &portDb 5432
+  portDbQuote : &portDbQuote "5432"
+  host : &host postgres-service
+  user : &user postgres
+  pwd : &pwd root
+  database : &database banking
+  minInstanceDB : &minInstanceDB 3
+  maxInstanceDB : &maxInstanceDB 20
+  stockageHost: &stockageHost /opt/demohelm
+
+global:
+  namespace: demohelm
+
+
+backend:
+  nameOverride : *nameBackend
+  fullnameOverride : *fullNameBackend
+  depotImage : *imagerepoback
+  tag : *versionImageBack
+  port : *portApi
+  minReplicas : *minInstance
+  maxReplicas : *maxInstance
+  environnements:
+    APP_PORT: *portApiQuote
+    DB_PORT: *portDbQuote
+    DB_HOST: *host
+    DB_USERNAME: *user
+    DB_PASSWORD: *pwd
+    DB_NAME: *database
+    JWT_SECRET: *jwt
+    DB_LOGGING: "true"
+    DB_SYNCHRONIZE: "true"
+  autoscaling:
+    enabled: true
+
+
+database:
+  nameOverride : *nameDB
+  fullnameOverride : *fullNameDB
+  depotImage : *imagerepoDB
+  tag : *versionImageDB
+  port : *portDb
+  minReplicas : *minInstanceDB
+  maxReplicas: *maxInstanceDB
+  environnements:
+    POSTGRES_DB: *database
+    POSTGRES_USER: *user
+    POSTGRES_PASSWORD: *pwd
+  pgadmin:
+    name:  monitoring
+    replicaCount: 1
+    image: dpage/pgadmin4
+    port: 80
+    mail: "aromyka@gmail.com"
+    password: "admin"
+    service:
+      type: NodePort
+      nodePort: 30017
+  volumeHost:
+    capacity: 5Gi
+    hostPath: *stockageHost
+  autoscaling:        
+    enabled: false

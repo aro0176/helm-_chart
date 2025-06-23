@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "phpmyadmin.name" . }}-service
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+    {{- include "phpmyadmin.labels" . | nindent 4 }}
+spec:
+  selector:
+    {{- include "phpmyadmin.selectorLabels" . | nindent 4 }}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      {{- if $.Values.nodePorts.enabled }}
+      nodePort: {{ $.Values.nodePorts.service.nodePort }}
+      {{- end }}
+  type: {{ $.Values.nodePorts.service.type }}
