@@ -1,3 +1,0 @@
-version 1.0.1
-Update charts
-modification les valeurs statique en Variable 
